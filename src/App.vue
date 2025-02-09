@@ -83,8 +83,11 @@ const collisionRate = computed(
 
 <style scoped>
 .wrapper {
+  padding: 1rem;
   max-width: 640px;
   margin: 0 auto;
+  background-color: aliceblue;
+  font-family: 'Courier New', Courier, monospace;
 }
 
 .form {
