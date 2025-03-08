@@ -12,6 +12,11 @@ const form = useForm({
   },
 })
 
+const validators = {
+  onChange: ({ value }: { value: number }) =>
+    isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
+}
+
 const HOUR_IN_SECONDS = 3600
 const SECOND_IN_MILLISECONDS = 1000
 const MILLISECONDS_TO_HOUR = HOUR_IN_SECONDS / SECOND_IN_MILLISECONDS
@@ -41,74 +46,50 @@ const collisionRate = computed(
     </p>
 
     <form class="form">
-      <form.Field
-        name="updateRatePerSecond"
-        :validators="{
-          onChange: ({ value }) =>
-            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
-        }"
-      >
+      <form.Field name="updateRatePerSecond" :validators="validators">
         <template v-slot="{ field }">
           <FormField
             label="Update rate per second"
             description="The rate at which the collision calculations are updated, in milliseconds."
             :name="field.name"
             :state="field.state"
-            @handleChange="field.handleChange"
+            @handleChange="(val: any) => field.handleChange(val)"
           />
         </template>
       </form.Field>
 
-      <form.Field
-        name="numberOfInstances"
-        :validators="{
-          onChange: ({ value }) =>
-            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
-        }"
-      >
+      <form.Field name="numberOfInstances" :validators="validators">
         <template v-slot="{ field }">
           <FormField
             label="Number of instances"
             description="The amount of services containing a replicated cache"
             :name="field.name"
             :state="field.state"
-            @handleChange="field.handleChange"
+            @handleChange="(val: any) => field.handleChange(val)"
           />
         </template>
       </form.Field>
 
-      <form.Field
-        name="cacheSize"
-        :validators="{
-          onChange: ({ value }) =>
-            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
-        }"
-      >
+      <form.Field name="cacheSize" :validators="validators">
         <template v-slot="{ field }">
           <FormField
             label="Cache size"
             description="The size of cache in number of rows"
             :name="field.name"
             :state="field.state"
-            @handleChange="field.handleChange"
+            @handleChange="(val: any) => field.handleChange(val)"
           />
         </template>
       </form.Field>
 
-      <form.Field
-        name="replicationLatency"
-        :validators="{
-          onChange: ({ value }) =>
-            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
-        }"
-      >
+      <form.Field name="replicationLatency" :validators="validators">
         <template v-slot="{ field }">
           <FormField
             label="Replication latency"
             description="The latency for replication in milliseconds"
             :name="field.name"
             :state="field.state"
-            @handleChange="field.handleChange"
+            @handleChange="(val: any) => field.handleChange(val)"
           />
         </template>
       </form.Field>
