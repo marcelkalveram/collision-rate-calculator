@@ -1,19 +1,33 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
+import { useForm } from '@tanstack/vue-form'
+import FormField from './FormField.vue'
 
-const updateRatePerSecond = ref(20)
-const numberOfInstances = ref(5)
-const cacheSize = ref(50000)
-const replicationLatencyPerMillisecond = ref(100)
+const form = useForm({
+  defaultValues: {
+    updateRatePerSecond: 20,
+    numberOfInstances: 5,
+    cacheSize: 50000,
+    replicationLatency: 100,
+  },
+})
 
-const MS_TO_HOUR = 3600 / 1000
+const HOUR_IN_SECONDS = 3600
+const SECOND_IN_MILLISECONDS = 1000
+const MILLISECONDS_TO_HOUR = HOUR_IN_SECONDS / SECOND_IN_MILLISECONDS
 
-const updatesPerHour = computed(() => updateRatePerSecond.value * 3600)
+// store values
+const updateRatePerSecond = form.useStore((state) => state.values.updateRatePerSecond)
+const numberOfInstances = form.useStore((state) => state.values.numberOfInstances)
+const cacheSize = form.useStore((state) => state.values.cacheSize)
+const replicationLatency = form.useStore((state) => state.values.replicationLatency)
+
+// computed values
 const collisionRate = computed(
   () =>
-    MS_TO_HOUR *
+    MILLISECONDS_TO_HOUR *
     ((numberOfInstances.value * updateRatePerSecond.value ** 2) / cacheSize.value) *
-    replicationLatencyPerMillisecond.value,
+    replicationLatency.value,
 )
 </script>
 
@@ -27,48 +41,85 @@ const collisionRate = computed(
     </p>
 
     <form class="form">
-      <div class="form-field">
-        <label class="label" for="updateRate">Update rate</label>
-        <small>The rate at which the collision calculations are updated, in milliseconds.</small>
-        <input
-          id="updateRate"
-          type="text"
-          v-model="updateRatePerSecond"
-          placeholder="Update rate in ms"
-        />
-      </div>
+      <form.Field
+        name="updateRatePerSecond"
+        :validators="{
+          onChange: ({ value }) =>
+            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
+        }"
+      >
+        <template v-slot="{ field }">
+          <FormField
+            label="Update rate per second"
+            description="The rate at which the collision calculations are updated, in milliseconds."
+            :name="field.name"
+            :state="field.state"
+            @handleChange="field.handleChange"
+          />
+        </template>
+      </form.Field>
 
-      <div class="form-field">
-        <label class="label" for="updateRate">Number of instances</label>
-        <small>The amount of services containing a replicated cache</small>
-        <input
-          id="updateRate"
-          type="text"
-          v-model="numberOfInstances"
-          placeholder="Number of instances"
-        />
-      </div>
+      <form.Field
+        name="numberOfInstances"
+        :validators="{
+          onChange: ({ value }) =>
+            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
+        }"
+      >
+        <template v-slot="{ field }">
+          <FormField
+            label="Number of instances"
+            description="The amount of services containing a replicated cache"
+            :name="field.name"
+            :state="field.state"
+            @handleChange="field.handleChange"
+          />
+        </template>
+      </form.Field>
 
-      <div class="form-field">
-        <label class="label" for="cacheSize">Cache size</label>
-        <small>The size of cache in number of rows</small>
-        <input id="cacheSize" type="text" v-model="cacheSize" placeholder="Cache size" />
-      </div>
+      <form.Field
+        name="cacheSize"
+        :validators="{
+          onChange: ({ value }) =>
+            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
+        }"
+      >
+        <template v-slot="{ field }">
+          <FormField
+            label="Cache size"
+            description="The size of cache in number of rows"
+            :name="field.name"
+            :state="field.state"
+            @handleChange="field.handleChange"
+          />
+        </template>
+      </form.Field>
 
-      <div class="form-field">
-        <label class="label" for="replicationLatency">Replication latency</label>
-        <small>The latency for replication in milliseconds</small>
-        <input
-          id="replicationLatency"
-          type="text"
-          v-model="replicationLatencyPerMillisecond"
-          placeholder="Replication latency"
-        />
-      </div>
+      <form.Field
+        name="replicationLatency"
+        :validators="{
+          onChange: ({ value }) =>
+            isNaN(value) || value <= 0 ? 'Value must be a number greater than 0' : null,
+        }"
+      >
+        <template v-slot="{ field }">
+          <FormField
+            label="Replication latency"
+            description="The latency for replication in milliseconds"
+            :name="field.name"
+            :state="field.state"
+            @handleChange="field.handleChange"
+          />
+        </template>
+      </form.Field>
     </form>
 
     <b>Updates per hour</b>
-    <p>{{ updatesPerHour }} / hour</p>
+    <form.Subscribe>
+      <template v-slot="{ values }">
+        <p>{{ values.updateRatePerSecond * HOUR_IN_SECONDS }} / hour</p>
+      </template>
+    </form.Subscribe>
 
     <h2>Collision rate</h2>
     <p>
@@ -94,14 +145,5 @@ const collisionRate = computed(
   display: grid;
   gap: 1rem;
   margin-bottom: 1rem;
-}
-
-.form-field {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.label {
-  font-weight: bold;
 }
 </style>
